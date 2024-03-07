@@ -14,7 +14,7 @@
 * can we find different means for different regions in general: states / or simply groups created from the geo coordinates? (might require some geospatial processing)
 
 ## Payment
-* Are customers inclined to spend more with a more payments ?
+* Are customers inclined to spend more with more payment installements ?
 ## Sellers
 * Are sellers in certain regions making more money that other regions ?
 * 

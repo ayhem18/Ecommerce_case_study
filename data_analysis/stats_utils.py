@@ -10,6 +10,7 @@ from scipy.stats import norm, mode
 from statsmodels.distributions.empirical_distribution import ECDF  as smart_ecdf
 from scipy.stats import ks_1samp
 from functools import partial
+from bisect import bisect_left
 
 def remove_outliers(x: Sequence):
     # this function simply removes any element that lies outside of the range  (q1 - 0.5 * IQR, q3 + 0.5 * IQR)
@@ -45,10 +46,8 @@ def test_sample_normal_distribution(sample: Sequence[Union[int, float]],
                             size=sample_size, 
                             random_state=random_state)
 
-        # in order for the plot to be rendered correctly, 
-
-        sample_hf = mode(sample).count.squeeze().item()
-        normal_hf = mode(norm_sample).count.squeeze().item()
+        sample_hf, norm_hf = np.max(np.histogram(sample)[0]), np.max(np.histogram(norm_sample)[0])
+        hf = max(sample_hf, norm_hf)
 
         # we will display both the density and cumulativel distributions to better understand how the sample 
         # compares to the normal distribution (also for debugging purposes !!)
@@ -62,7 +61,7 @@ def test_sample_normal_distribution(sample: Sequence[Union[int, float]],
         plt.ylabel('probability')
         plt.xticks(ticks=np.linspace(np.min(sample), np.max(sample), 26), rotation=90)
         # plt.yticks(np.linspace(0, 1, 26))
-        plt.yticks([int(x) for x in np.linspace(1, sample_highest_freq, 26)])
+        plt.yticks([int(x) for x in np.linspace(1, hf, 26)])
         plt.legend()
         plt.title('density distribution')
 

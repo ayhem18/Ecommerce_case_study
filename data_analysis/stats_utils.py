@@ -1,14 +1,12 @@
 """
 This script contains utility functions that are used across the different scripts in this case study
 """
-import random
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
-
-from typing import Sequence, Union, List
-from scipy.stats import norm
-from tqdm import tqdm
+from typing import Sequence, Union
+from scipy.stats import norm, mode
 from statsmodels.distributions.empirical_distribution import ECDF  as smart_ecdf
 from scipy.stats import ks_1samp
 from functools import partial
@@ -24,13 +22,14 @@ def test_sample_normal_distribution(sample: Sequence[Union[int, float]],
                                     display: bool = False,
                                     random_state: int = 60
                                     ):
+    if isinstance(sample, pd.Series):
+        sample = sample.values
 
     sample_size = len(sample)    
     if sample_size <= 30:
         raise ValueError(f"The power of the 'Kolmogorov-Smirnov Test' is might be limited without a large sample of at least 30 elements. Found: {sample_size} elements") 
 
     sample_mean, sample_std = np.mean(sample), np.std(sample)
-    
     p_values = []
 
     # the code is based on the documentation of the 'scipy.kstest' function
@@ -46,18 +45,24 @@ def test_sample_normal_distribution(sample: Sequence[Union[int, float]],
                             size=sample_size, 
                             random_state=random_state)
 
+        # in order for the plot to be rendered correctly, 
+
+        sample_hf = mode(sample).count.squeeze().item()
+        normal_hf = mode(norm_sample).count.squeeze().item()
+
         # we will display both the density and cumulativel distributions to better understand how the sample 
         # compares to the normal distribution (also for debugging purposes !!)
         fig = plt.figure(figsize=(20, 8))
 
         # the first plot will be the density function
         fig.add_subplot(1, 3, 1)
-        plt.hist(sample, bins=20, density=True, label='sample', color='g') # 'g' for green
-        plt.hist(norm_sample, bins=20, density=True, label='normal', color='r') # 'r' for red
+        plt.hist(sample, bins=20, density=False, label='sample', color='g') # 'g' for green
+        plt.hist(norm_sample, bins=20, density=False, label='normal', color='r') # 'r' for red
         plt.xlabel('value')
         plt.ylabel('probability')
         plt.xticks(ticks=np.linspace(np.min(sample), np.max(sample), 26), rotation=90)
-        plt.yticks(np.linspace(0, 1, 11))
+        # plt.yticks(np.linspace(0, 1, 26))
+        plt.yticks([int(x) for x in np.linspace(1, sample_highest_freq, 26)])
         plt.legend()
         plt.title('density distribution')
 
@@ -66,10 +71,10 @@ def test_sample_normal_distribution(sample: Sequence[Union[int, float]],
         normal_cdf = normal_cdf_callable(sample)
 
         fig.add_subplot(1, 3, 2)
-        plt.ecdf(sample, sample_cdf, label='sample', color='g') # 'g' for green
-        plt.ecdf(sample, normal_cdf, label='normal', color='r') # 'r' for red
+        plt.plot(sample, sample_cdf, label='sample', color='g') # 'g' for green
+        plt.plot(sample, normal_cdf, label='normal', color='r') # 'r' for red
         plt.xlabel('value')
-        plt.ylabel('probability')
+        plt.ylabel('cumulative probability: P(X <= t)')
         plt.xticks(ticks=np.linspace(np.min(sample), np.max(sample), 26), rotation=90)
         plt.yticks(np.linspace(0, 1, 11))
         plt.legend()

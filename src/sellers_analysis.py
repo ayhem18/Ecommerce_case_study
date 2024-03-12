@@ -32,6 +32,7 @@ def analyze_product_per_seller(order_item_df: pd.DataFrame, display: bool = True
     # this line groups the orders by their products and for each product calculate the number of unique sellers who sell the given product
     # afterwards it sorts them descendingly according to this number
     product_by_seller = order_item_df.groupby('product_id')['seller_id'].agg(lambda x: len(np.unique(x))).sort_values(ascending=False)    
+    # extract the id of products sold by at least 2 sellers
     multi_seller_products = (product_by_seller[product_by_seller > 1]).index.tolist()
     
     if display:
@@ -70,16 +71,14 @@ def average_product_price_by_state(multi_seller_orders_df: pd.DataFrame,
         # group by state and consider the average price suggested by sellers from different states
         average_prices_by_state = product_sellers.groupby('seller_state')['price'].agg(['mean'])
         
-        # it is worth warning the user when we don't find the states we are looking for
+        # only add products that are sold by both sellers
         if sorted([state1, state2]) != average_prices_by_state.index.tolist():
-            # print(f"it seems that product with id {pi} does not have sellers from both {state1} and {state2}")
-            # only save the data when both states are present
             continue
 
         product_average_prices[pi][state1] = average_prices_by_state.loc[state1].item()
         product_average_prices[pi][state2] = average_prices_by_state.loc[state2].item()
 
-    # convert the result into a dataframe
+    # convert the results into a dataframe
     product_average_prices = [{"product_id": k, state1: v[state1], state2: v[state2]} for k, v in product_average_prices.items()]
     return pd.DataFrame(product_average_prices)
 
@@ -90,6 +89,7 @@ def display_average_price_distribution(s1_ap: Sequence[float],
                                        state2: str,
                                        log_scale: bool,
                                        figsize: Tuple[int, int] = None):
+    # apply the log transform if needed
     if log_scale:
         s1_ap, s2_ap = np.log2(s1_ap), np.log2(s2_ap)
 
@@ -118,21 +118,3 @@ def display_average_price_distribution(s1_ap: Sequence[float],
     plt.yticks([int(x) for x in np.linspace(1, sample_frequncy, 11)])
     plt.title(f'The distribution of average prices in {state2}')
     plt.show()
-
-if __name__ == '__main__':
-    sellers_df = read_seller_csv()
-    order_items_df = read_order_items_csv()
-    multi_seller_products = analyze_product_per_seller(order_item_df=order_items_df, display=False)
-    multi_seller_orders = prepare_multi_seller_price_data(order_item_df=order_items_df, 
-                                                          sellers_df=sellers_df, 
-                                                          multi_seller_products=multi_seller_products)
-
-    sp_rj_average_product_price = average_product_price_by_state(multi_seller_orders_df=multi_seller_orders,
-                                                                    state1="SP", 
-                                                                    state2="RJ")
-
-    sp_ap, rj_ap = np.log2(sp_rj_average_product_price['SP']), np.log2(sp_rj_average_product_price['RJ'])
-
-    from stats_utils import test_sample_normal_distribution
-    pvalues = test_sample_normal_distribution(sample=sp_ap) 
-    print(pvalues)

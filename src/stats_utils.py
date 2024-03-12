@@ -6,11 +6,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from typing import Sequence, Union
-from scipy.stats import norm, mode
+from scipy.stats import norm
 from statsmodels.distributions.empirical_distribution import ECDF  as smart_ecdf
 from scipy.stats import ks_1samp
 from functools import partial
-from bisect import bisect_left
 
 def remove_outliers(x: Sequence):
     # this function simply removes any element that lies outside of the range  (q1 - 0.5 * IQR, q3 + 0.5 * IQR)

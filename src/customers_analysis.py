@@ -55,7 +55,8 @@ def get_cool_customers(customers_df: pd.DataFrame, min_repeated_purchases: int =
 
 
 def visualize_customers_distribution_per_state(customer_df: pd.DataFrame, figsize: Tuple[int, int] = None):
-    """a plain visualization of the distribution of customers with respect to the state
+    """
+    a function to visualize the distribution of customers per the state
     """
     if figsize is None:
         figsize = (10, 6)
@@ -74,7 +75,7 @@ def visualize_customers_distribution_per_state(customer_df: pd.DataFrame, figsiz
 
 def visualize_cool_customers_distribution_per_state(cool_customers: pd.DataFrame, figsize: Tuple[int, int]) -> None:
     """
-    a plain visualization of the distribution of cool customers (those who use the platform at least twice) with respect to the different states
+    a function to visualize the distribution of cool customers (those who used the platform at least twice) per state
     """
     if figsize is None:
         figsize = (10, 6)

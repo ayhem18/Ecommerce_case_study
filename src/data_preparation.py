@@ -26,7 +26,7 @@ def squeeze_directory(directory_path: Union[str, Path]) -> None:
     # Given a directory with only one subdirectory, this function moves all the content of
     # subdirectory to the parent directory
 
-    # first convert to abs
+    # first convert to the absolute path
     path = abs_path(directory_path)
 
     if not os.path.isdir(path):

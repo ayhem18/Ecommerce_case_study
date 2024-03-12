@@ -29,7 +29,6 @@ def read_item_order_df() -> pd.DataFrame:
 def read_products_df() -> pd.DataFrame:
     products_csv_path = os.path.join(DATA_FOLDER, 'olist_products_dataset.csv')
     product_df = pd.read_csv(products_csv_path).drop(columns=["product_length_cm", "product_height_cm", "product_width_cm"]).dropna()
-    # modify categ
 
     # make sure to translate the category names from portuguese to English
     from deep_translator import GoogleTranslator
@@ -91,6 +90,7 @@ def display_product_orders_skewness(order_item_count: pd.DataFrame,
     qy = emperical_cdf([int(x) for x in qx])
 
     for x, y, q, color in zip(qx, qy, [0.01, 0.05, 0.1], ['r', 'b', 'g']):
+        # add the vertical lines to the plot
         plt.axvline(x, ymax=y, color='c', label=f'top {int(100 * q)}-th quantile popular products', c=color, linestyle='--')
 
     plt.xticks(np.linspace(1, np.max(ranks), 51), rotation=90)
@@ -107,6 +107,15 @@ def display_product_orders_skewness(order_item_count: pd.DataFrame,
 
 def filter_order_item_csv_top_products(order_item_count: pd.DataFrame, 
                              quantile_rank: int) -> pd.DataFrame:
+    """This function filters the orders and products by popularity.
+
+    Args:
+        order_item_count (pd.DataFrame): the original dataframe with orders and products
+        quantile_rank (int): The rank of the least popular product to keep
+    Returns:
+        pd.DataFrame: The new dataframe with orders only including top products 
+    """
+    
     if 'rank' not in order_item_count.columns: 
         raise ValueError(f"Please make sure the column 'rank' is present in the dataframe. Found columns: {order_item_count.columns}")  
     # keep only the top -quantile_rank products

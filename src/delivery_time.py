@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
-home = os.getcwd()
-current = home
-while 'mid' not in os.listdir(current):
-    current = Path(current).parent
-DATA_FOLDER = os.path.join(current, 'mid')
+# home = os.getcwd()
+# current = home
+# while 'mid' not in os.listdir(current):
+#     current = Path(current).parent
+# DATA_FOLDER = os.path.join(current, 'mid')
 
 
 import pandas as pd
